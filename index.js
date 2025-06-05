@@ -2,10 +2,6 @@ const express = require("express")
 const { dbConnection } = require("./config/config")
 const app = express()
 const PORT = 8080
-const { dbConnection } = require("./config/config")
-
-dbConnection()
-
 
 
 dbConnection()
