@@ -1,0 +1,25 @@
+{
+  "name": "mongoredsocial",
+  "version": "1.0.0",
+  "description": "### API REST de una Red Social",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "node --watch index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alejandrogoscu/MongoRedSocial.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alejandrogoscu/MongoRedSocial/issues"
+  },
+  "homepage": "https://github.com/alejandrogoscu/MongoRedSocial#readme",
+  "dependencies": {
+    "express": "5.1.0",
+    "mongoose": "8.15.1"
+  }
+}
