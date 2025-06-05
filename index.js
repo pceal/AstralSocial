@@ -6,12 +6,13 @@ const PORT = 8080
 
 dbConnection()
 
+
 // MIDDLEWARE
 app.use(express.json())
 
 // ENDPOINTS
 app.use("/users", require("./routes/users"))
-
+app.use("/posts", require("./routes/posts"));
 
 // SERVER
 app.listen(PORT, () => {
