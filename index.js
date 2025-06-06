@@ -12,7 +12,9 @@ app.use(express.json())
 
 // ENDPOINTS
 app.use("/users", require("./routes/users"))
-app.use("/posts", require("./routes/posts"));
+app.use("/posts", require("./routes/posts"))
+
+
 
 // SERVER
 app.listen(PORT, () => {
