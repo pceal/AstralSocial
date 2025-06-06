@@ -1,43 +1,36 @@
 const mongoose = require('mongoose');
 
-
 const PostSchema = new mongoose.Schema({
-  username: {
-    type: Schema.Types.ObjectId,
+  author: {
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    //required: true
+    required: true
   },
-  
-   title: {
+  title: {
     type: String,
-    //required: true,
+    required: true,
     trim: true 
-    },
+  },
   content: {
     type: String,
-    //required: true,
+    required: true,
     maxlength: 500,
     trim: true
   },
   images: [{
-    type: String // url de imágenes/opcionales
+    type: String // url de imágenes si nos da la gana
   }],
- /* visibility: {
-    type: String,
-    enum: ['Publico', 'Solo Amigos', 'Privado'],
-    default: 'Publico'
-  },*/
   likes: [{
-    type: Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   }],
   comments: [{
-    type: Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'Comment'
   }]
 }, {
-  timestamps: true  //aquí nos va a decir la hora y la fecha en la que se ha posteado
+  timestamps: true  
 });
 
-
-module.exports = mongoose.model('Post', PostSchema);
+const Post = mongoose.model('Post', PostSchema);
+module.exports = Post;
