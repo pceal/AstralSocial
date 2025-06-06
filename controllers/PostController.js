@@ -4,7 +4,7 @@ const PostController = {
   // Crear post
   async create(req, res) {
     try {
-      const { title, content, images, author } = req.body;
+      const { title, content, images} = req.body;
 
       // Validación de campos obligatorios
       if (!title || !content || !author) {
@@ -16,7 +16,7 @@ const PostController = {
         title,
         content,
         images,
-        author //req.user._id
+        author: req.user._id
       });
 
       res.status(201).send(post);

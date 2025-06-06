@@ -1,5 +1,6 @@
 
 const User = require("../models/User")
+const Post = require("../models/Post")
 const bcrypt = require("bcryptjs")
 const { JWT_SECRET } = require("../config/keys")
 const jwt = require("jsonwebtoken")
@@ -8,6 +9,9 @@ const jwt = require("jsonwebtoken")
 const UserController = {
   async register(req, res) {
     try {
+      if (req.body.username || req.body.email || req.body.password) {
+        return res.status(400).send("Rellena todos los campos")
+      }
       const password = bcrypt.hashSync(req.body.password, 10)
       const user = await User.create({...req.body, password, role: "user" })
       res.status(201).send({ msg: "Usuari@ creado con éxito", user})
@@ -57,10 +61,22 @@ const UserController = {
     }
   },
 
+  async getUserConnected(req, res) {
+    try {
+      const token = req.headers.authorization?.replace("Bearer ", "")
+      const payload = jwt.verify(token, JWT_SECRET)
+      const user = await User.findById(payload._id).select("username email bio role")
+      const posts = await Post.find({ author: user._id }).select("title content createdAt")
+      res.status(200).send( {user, posts })
+    } catch (error) {
+      res.status(500).send("Ha habido un problema al buscar usuari@")
+    }
+  },
+
   async getUserByUsername(req, res) {
     try {
       const username = new RegExp(req.params.username, "i");
-      const users = await User.find({username});
+      const users = await User.find({username}).select("username email bio role");
       res.status(200).send(users)
     } catch (error) {
       res.status(500).send("Ha habido un problema al buscar al usuari@")
@@ -69,7 +85,7 @@ const UserController = {
 
   async getUserById(req, res) {
     try {
-      const user = await User.findById(req.params._id)
+      const user = await User.findById(req.params._id).select("username email bio role")
       res.status(200).send(user)
     } catch (error) {
       res.status(500).send("Ha habido un problema al buscar al usuari@")
