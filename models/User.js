@@ -16,7 +16,9 @@ const UserSchema = new mongoose.Schema({
     required: [true, "La contraseña es obligatoria"]
   },
   // image: String,
-  bio: String
+  bio: String,
+  role: String,
+  tokens: []
 }, { timestamps: true });
 
 const User = mongoose.model("User", UserSchema);

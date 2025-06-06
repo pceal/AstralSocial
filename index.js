@@ -14,6 +14,7 @@ app.use(express.json())
 app.use("/users", require("./routes/users"))
 
 
+
 // SERVER
 app.listen(PORT, () => {
   console.log(`Server started on port http://localhost:${PORT}`)

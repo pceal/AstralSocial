@@ -1,12 +1,16 @@
+
 const User = require("../models/User")
 const bcrypt = require("bcryptjs")
+const { JWT_SECRET } = require("../config/keys")
+const jwt = require("jsonwebtoken")
+
 
 const UserController = {
-  async create(req, res) {
+  async register(req, res) {
     try {
       const password = bcrypt.hashSync(req.body.password, 10)
-      const user = await User.create({...req.body, password:password})
-      res.status(201).send(user)
+      const user = await User.create({...req.body, password, role: "user" })
+      res.status(201).send({ msg: "Usuari@ creado con éxito", user})
     } catch (error) {
       res.status(500).send("Ha habido un problema al crear al usuari@")
     }
@@ -15,17 +19,41 @@ const UserController = {
   async login(req, res) {
     try {
       const user = await User.findOne({email: req.body.email})
-
-      const isMatch = bcrypt.compareSync(req.body.password, user.password)
       if (!user) {
         return res.status(400).send("Usuari@ o contraseña incorrectos")
       }
+
+      const isMatch = await bcrypt.compare(req.body.password, user.password)
       if (!isMatch) {
         return res.status(400).send("Usuari@ o contraseña incorrectos")
       }
-      res.status(200).send(`Bienvenid@ ${user.username}`)
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET)
+      if (user.tokens.length > 4) user.tokens.shift();
+      user.tokens.push(token);
+      await user.save();
+      res.status(200).send({ msg: `Bienvenid@ ${user.username}`, user})
     } catch (error) {
+      console.error(error)
       res.status(500).send("Error en el login")
+    }
+  },
+
+  async logout(req, res) {
+    try {
+      if (!req.user) {
+        return res.status(401).send("No autorizado")
+      }
+      const token = req.headers.authorization?.replace("Bearer ", "")
+      if (!token) {
+        return res.status(400).send("Token no proporcionado")
+      }
+      await User.findByIdAndUpdate(req.user._id, 
+        { $pull:{ tokens: token } },
+        { new: true }
+      )
+      res.send("Desconectad@ con exito")
+    } catch (error) {
+      res.status(500).send("Ha habido un problema al desconectar al usuari@")
     }
   },
 
@@ -38,6 +66,7 @@ const UserController = {
       res.status(500).send("Ha habido un problema al buscar al usuari@")
     }
   },
+
   async getUserById(req, res) {
     try {
       const user = await User.findById(req.params._id)
