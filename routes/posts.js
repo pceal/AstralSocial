@@ -12,5 +12,7 @@ router.get("/search", PostController.searchByTitle);
 router.get("/id/:_id", PostController.getById);
 router.put("/id/:_id",authentication, PostController.update);
 router.delete("/id/:_id",authentication, PostController.delete);
+router.put("/like/:id", authentication, PostController.toggleLike);
+
 
 module.exports = router;

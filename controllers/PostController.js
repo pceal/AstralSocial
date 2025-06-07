@@ -27,7 +27,7 @@ const PostController = {
     }
   },
 
-  // Obtener todos los posts (con paginación y populate del autor)
+  // Obtener todos los posts con paginación y populate del autor
   async getAll(req, res) {
     try {
       const page = parseInt(req.query.page) || 1;
@@ -36,6 +36,15 @@ const PostController = {
 
       const posts = await Post.find()
         .populate("author", "username email") // solo username y email del autor
+        .populate("likes", "username") // aquí muestra el like y el username del que le ha dado
+       /* .populate({
+              path: "comments",
+              populate: {
+              path: "author",
+              select: "username"
+             }
+           })*/
+
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
@@ -60,7 +69,15 @@ const PostController = {
       const { id } = req.params;
 
       const post = await Post.findById(id)
-        .populate("author", "username email"); 
+        .populate("author", "username email")
+        .populate("like", "username") // nos va a encontrar los likes mediante el username
+       /* .populate({
+              path: "comments",
+              populate: {
+              path: "author",
+              select: "username"
+              }
+           })*/
 
       if (!post) {
         return res.status(404).send({ message: "Post no encontrado." });
@@ -134,7 +151,40 @@ const PostController = {
       console.error(error);
       res.status(500).send({ message: "Error al eliminar el post." });
     }
+  },
+  // Añadir o quitar like a un post
+  async toggleLike(req, res) {
+    try {
+      const { id } = req.params;
+      const userId = req.user._id;
+
+      const post = await Post.findById(id);
+
+      if (!post) {
+        return res.status(404).send({ message: "Post no encontrado." });
+      }
+
+      const hasLiked = post.likes.includes(userId);
+
+      if (hasLiked) {
+        post.likes.pull(userId);  // Quitar el like
+      } else {
+        post.likes.push(userId);  // Dar like
+      }
+
+      await post.save();
+
+      res.status(200).send({
+        message: hasLiked ? "Like eliminado" : "Like añadido",
+        totalLikes: post.likes.length
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ message: "Error al actualizar los likes." });
+    }
   }
-};
+}; 
+
+
 
 module.exports = PostController;
