@@ -5,6 +5,7 @@ const PostController = {
   async create(req, res) {
     try {
       const { title, content, images } = req.body;
+      const author = req.user._id;
 
       // Validación de campos obligatorios
       if (!title || !content || !author) {
@@ -16,7 +17,7 @@ const PostController = {
         title,
         content,
         images,
-        author: req.user._id
+        author
       });
 
       res.status(201).send(post);
@@ -26,7 +27,7 @@ const PostController = {
     }
   },
 
-  // Obtener todos los posts (con paginación SIN populate)
+  // Obtener todos los posts (con paginación y populate del autor)
   async getAll(req, res) {
     try {
       const page = parseInt(req.query.page) || 1;
@@ -34,6 +35,7 @@ const PostController = {
       const skip = (page - 1) * limit;
 
       const posts = await Post.find()
+        .populate("author", "username email") // solo username y email del autor
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
@@ -52,12 +54,13 @@ const PostController = {
     }
   },
 
-  // Obtener un post por su ID (sin populate)
+  // Obtener un post por su ID 
   async getById(req, res) {
     try {
       const { id } = req.params;
 
-      const post = await Post.findById(id);
+      const post = await Post.findById(id)
+        .populate("author", "username email"); 
 
       if (!post) {
         return res.status(404).send({ message: "Post no encontrado." });
@@ -81,7 +84,9 @@ const PostController = {
 
       const name = new RegExp(title, "i");
 
-      const posts = await Post.find({ title: name }).sort({ createdAt: -1 });
+      const posts = await Post.find({ title: name })
+        .select("author title content")
+        .populate("author", "username"); 
 
       res.status(200).send(posts);
     } catch (error) {

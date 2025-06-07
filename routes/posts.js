@@ -9,8 +9,8 @@ const {authentication} = require("../middlewares/authentication");
 router.post("/",authentication, PostController.create)
 router.get("/", PostController.getAll);
 router.get("/search", PostController.searchByTitle); 
-router.get("/:id", PostController.getById);
-router.put("/:id",authentication, PostController.update);
-router.delete("/:id",authentication, PostController.delete);
+router.get("/id/:_id", PostController.getById);
+router.put("/id/:_id",authentication, PostController.update);
+router.delete("/id/:_id",authentication, PostController.delete);
 
 module.exports = router;
