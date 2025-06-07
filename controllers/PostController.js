@@ -98,11 +98,11 @@ const PostController = {
   // Actualizar un post por ID
   async update(req, res) {
     try {
-      const { id } = req.params;
+      const { _id } = req.params;
       const { title, content, images } = req.body;
 
       const updatedPost = await Post.findByIdAndUpdate(
-        id,
+        _id,
         { title, content, images },
         { new: true }
       );
@@ -121,9 +121,9 @@ const PostController = {
   // Eliminar un post por ID
   async delete(req, res) {
     try {
-      const { id } = req.params;
+      const { _id } = req.params;
 
-      const deletedPost = await Post.findByIdAndDelete(id);
+      const deletedPost = await Post.findByIdAndDelete(_id);
 
       if (!deletedPost) {
         return res.status(404).send({ message: "Post no encontrado para eliminar." });
