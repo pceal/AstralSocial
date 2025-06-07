@@ -9,7 +9,7 @@ const UserSchema = new mongoose.Schema({
   email:{
     type: String,
     // required: [true, "El email es obligatorio"],
-    unique: true
+    unique: true,
   },
   password: {
     type: String,
@@ -18,6 +18,10 @@ const UserSchema = new mongoose.Schema({
   // image: String,
   bio: String,
   role: String,
+  confirmed: {
+    type: Boolean,
+    default: false
+  },
   tokens: []
 }, { timestamps: true });
 
