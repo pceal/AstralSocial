@@ -95,8 +95,8 @@ const UserController = {
     try {
       const token = req.headers.authorization?.replace("Bearer ", "")
       const payload = jwt.verify(token, JWT_SECRET)
-      const user = await User.findById(payload._id).select("username email bio role")
-      const posts = await Post.find({ author: user._id }).select("title content createdAt")
+      const user = await User.findById(payload._id)
+      const posts = await Post.find({ author: user._id }).select("title content images createdAt")
       res.status(200).send({ user, posts })
     } catch (error) {
       res.status(500).send("Ha habido un problema al buscar usuari@")
@@ -106,7 +106,7 @@ const UserController = {
   async getUserByUsername(req, res) {
     try {
       const username = new RegExp(req.params.username, "i");
-      const users = await User.find({ username }).select("username email bio role");
+      const users = await User.find({ username })
       res.status(200).send(users)
     } catch (error) {
       res.status(500).send("Ha habido un problema al buscar al usuari@")
@@ -115,7 +115,7 @@ const UserController = {
 
   async getUserById(req, res) {
     try {
-      const user = await User.findById(req.params._id).select("username email bio role")
+      const user = await User.findById(req.params._id)
       res.status(200).send(user)
     } catch (error) {
       res.status(500).send("Ha habido un problema al buscar al usuari@")

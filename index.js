@@ -10,7 +10,6 @@ dbConnection()
 // MIDDLEWARE
 app.use(express.json())
 
-//RUTAS
 
 // ENDPOINTS
 app.use("/users", require("./routes/users"))
