@@ -14,9 +14,9 @@ const PostController = {
         return res.status(400).send({ message: "El título, el contenido y el autor son obligatorios." });
       }
       // Validación opcional de imagen, si no queremos lo comentamos y ya está
-      if (!imagePath) {
+      /*if (!imagePath) {
       return res.status(400).send({ message: "Debes subir una imagen" });
-      }
+      }*/
 
       // Crear post con autor req.user viene del middleware de autenticación o eso espero
       const post = await Post.create({
@@ -43,13 +43,13 @@ const PostController = {
       const posts = await Post.find()
         .populate("author", "username email") // solo username y email del autor
         .populate("likes", "username") // aquí muestra el like y el username del que le ha dado
-       /* .populate({
+        .populate({
               path: "comments",
               populate: {
               path: "author",
               select: "username"
              }
-           })*/
+           })
 
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -72,18 +72,18 @@ const PostController = {
   // Obtener un post por su ID 
   async getById(req, res) {
     try {
-      const { id } = req.params;
+      
 
-      const post = await Post.findById(id)
+      const post = await Post.findById(req.params._id)
         .populate("author", "username email")
         .populate("likes", "username") // nos va a encontrar los likes mediante el username
-       /* .populate({
+       .populate({
               path: "comments",
               populate: {
               path: "author",
               select: "username"
               }
-           })*/
+           })
 
       if (!post) {
         return res.status(404).send({ message: "Post no encontrado." });
@@ -146,9 +146,8 @@ const PostController = {
   // Eliminar un post por ID
   async delete(req, res) {
     try {
-      const { _id } = req.params;
 
-      const deletedPost = await Post.findByIdAndDelete(_id);
+      const deletedPost = await Post.findByIdAndDelete(req.params._id);
 
       if (!deletedPost) {
         return res.status(404).send({ message: "Post no encontrado para eliminar." });
