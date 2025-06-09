@@ -7,16 +7,22 @@ const PostController = {
       const { title, content, images } = req.body;
       const author = req.user._id;
 
+      const imagePath = req.file ? req.file.path : null; //esta linea es para que Multer tenga acceso a las imagenes
+
       // Validación de campos obligatorios
       if (!title || !content || !author) {
         return res.status(400).send({ message: "El título, el contenido y el autor son obligatorios." });
       }
+      // Validación opcional de imagen, si no queremos lo comentamos y ya está
+      if (!imagePath) {
+      return res.status(400).send({ message: "Debes subir una imagen" });
+      }
 
-      // Crear post con autor (req.user debe venir del middleware de autenticación)
+      // Crear post con autor req.user viene del middleware de autenticación o eso espero
       const post = await Post.create({
         title,
         content,
-        images,
+        images: imagePath,
         author
       });
 
@@ -70,7 +76,7 @@ const PostController = {
 
       const post = await Post.findById(id)
         .populate("author", "username email")
-        .populate("like", "username") // nos va a encontrar los likes mediante el username
+        .populate("likes", "username") // nos va a encontrar los likes mediante el username
        /* .populate({
               path: "comments",
               populate: {
@@ -116,11 +122,13 @@ const PostController = {
   async update(req, res) {
     try {
       const { _id } = req.params;
-      const { title, content, images } = req.body;
+      const { title, content, images } = req.body; 
+
+      const imagePath = req.file ? req.file.path : null; // esto es lo mismo para Multer
 
       const updatedPost = await Post.findByIdAndUpdate(
         _id,
-        { title, content, images },
+        { title, content, images: imagePath ||images }, // imagepath o image es por si no se actualiza la imagen dejarla como está
         { new: true }
       );
 
