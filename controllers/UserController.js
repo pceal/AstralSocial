@@ -106,7 +106,7 @@ const UserController = {
   async getUserByUsername(req, res) {
     try {
       const username = new RegExp(req.params.username, "i");
-      const users = await User.find({ username })
+      const users = await User.find({ username });
       res.status(200).send(users)
     } catch (error) {
       res.status(500).send("Ha habido un problema al buscar al usuari@")
