@@ -1,5 +1,6 @@
 const express = require("express")
 const { dbConnection } = require("./config/config")
+const { handleTypeError } = require("./middlewares/errors")
 const app = express()
 const PORT = 8080
 
@@ -18,7 +19,7 @@ app.use("/comments", require("./routes/comments"))
 app.use("/uploads", express.static("uploads"));
 
 
-
+app.use(handleTypeError)
 
 // SERVER
 app.listen(PORT, () => {

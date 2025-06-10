@@ -8,11 +8,12 @@ const transporter = require("../config/nodemailer")
 
 
 const UserController = {
-  async register(req, res) {
+  async register(req, res, next) {
     try {
-      if (!req.body.username || !req.body.email || !req.body.password) {
-        return res.status(400).send("Rellena todos los campos")
+      if (!req.body.password) {
+        return res.status(400).send("La contraseña es obligatoria")
       }
+
       const password = bcrypt.hashSync(req.body.password, 10)
       const user = await User.create({ ...req.body, password, role: "user" })
 
@@ -27,7 +28,7 @@ const UserController = {
 
       res.status(201).send({ msg: "Te hemos enviado un correo para confirmar tu registro", user })
     } catch (error) {
-      res.status(500).send("Ha habido un problema al crear al usuari@")
+      next(error)
     }
   },
 
