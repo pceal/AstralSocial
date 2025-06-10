@@ -97,7 +97,7 @@ const UserController = {
     try {
       const token = req.headers.authorization?.replace("Bearer ", "")
       const payload = jwt.verify(token, JWT_SECRET)
-      const user = await User.findById(payload._id)
+      const user = await User.findById(payload._id).populate("followers", "username")
       const posts = await Post.find({ author: user._id }).select("title content images createdAt")
       res.status(200).send({ user, posts })
     } catch (error) {
@@ -121,6 +121,42 @@ const UserController = {
       res.status(200).send(user)
     } catch (error) {
       res.status(500).send("Ha habido un problema al buscar al usuari@")
+    }
+  },
+
+  async toggleFollow(req, res) {
+    try {
+      const userId = req.params._id
+      const currentUserId = req.user._id
+
+      if (currentUserId.toString() === userId) {
+        return res.status(400).send("No puedes seguirte a tí mismo")
+      }
+
+      const targetUser = await User.findById(userId)
+      if (!targetUser) {
+        return res.status(404).send("Usuario no encontrado")
+      }
+
+      const isFollowing = req.user.following.includes(userId)
+      if (isFollowing) {
+        req.user.following.pull(userId)
+        targetUser.followers.pull(currentUserId)
+      } else {
+        req.user.following.push(userId)
+        targetUser.followers.push(currentUserId)
+      }
+
+      await req.user.save()
+      await targetUser.save()
+
+      res.status(200).send({
+        msg: isFollowing ? "Has dejado de seguir al usuari@" : "Ahora sigues a este usuari@",
+        followersCount: targetUser.followers.length
+      })
+    } catch (error) {
+      console.error(error)
+      res.status(500).send("Error con los followers")
     }
   }
 }
