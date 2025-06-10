@@ -1,15 +1,16 @@
-const express = require("express")
-const CommentController = require("../controllers/CommentController")
-//const { authentication, isAuthorOrder, isAdmin } = require("../middlewares/authentication")
-const Comment = require("../models/Comment")
-const { authentication } = require("../middlewares/authentication")
-const router = express.Router()
+const express = require("express");
+const router = express.Router();
+const CommentController = require("../controllers/CommentController");
+const { authentication } = require("../middlewares/authentication");
+const upload = require("../middlewares/upload");
+
+router.post("/post/:postId", authentication, upload.single("image"), CommentController.create);
+router.get("/", CommentController.getAll);
+router.get("/post/:postId", CommentController.getByPostId);
+router.put("/id/:_id", authentication, upload.single("image"), CommentController.update);
+router.delete("/id/:_id", authentication, CommentController.delete);
+
+module.exports = router;
 
 
-router.post("/",authentication, CommentController.create)//authentication,
-router.get("/", CommentController.getAll)
-router.put("/id/:_id", CommentController.update) //authentication, isAuthorOrder,
-router.delete("/id/:_id", CommentController.delete)//authentication, isAdmin,
 
-
-module.exports = router
