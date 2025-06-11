@@ -24,7 +24,7 @@ ChewBooka es una red social básica desarrollada como proyecto backend, que perm
 
 1. Clona el repositorio:
 ```bash
-git clone https://github.com/tu-usuario/chewbooka.git
+git clone https://github.com/alejandrogoscu/ChewBooka.git
 cd chewbooka
 ```
 

@@ -9,6 +9,7 @@ router.get("/", CommentController.getAll);
 router.get("/post/:postId", CommentController.getByPostId);
 router.put("/id/:_id", authentication, upload.single("image"), CommentController.update);
 router.delete("/id/:_id", authentication, CommentController.delete);
+router.put("/like/:id", authentication, CommentController.toggleLike);
 
 module.exports = router;
 

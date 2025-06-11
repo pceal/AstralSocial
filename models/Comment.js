@@ -7,6 +7,10 @@ const CommentSchema = new Schema(
     author: { type: Schema.Types.ObjectId, ref: "User", required: true },
     post: { type: Schema.Types.ObjectId, ref: "Post", required: true },
     image: { type: String },
+     likes: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      }],
   },
   { timestamps: true }
 );

@@ -38,7 +38,8 @@ const CommentController = {
     try {
       const comments = await Comment.find()
         .populate("author", "username")
-        .populate("post", "title");
+        .populate("post", "title")
+         .populate("likes", "username") 
 
       res.status(200).send(comments);
     } catch (error) {
@@ -54,6 +55,7 @@ const CommentController = {
 
       const comments = await Comment.find({ post: postId })
         .populate("author", "username")
+         .populate("likes", "username") // nos va a encontrar los likes mediante el username
         .sort({ createdAt: -1 });
 
       res.status(200).send(comments);
@@ -108,7 +110,36 @@ const CommentController = {
       console.error(error);
       res.status(500).send({ message: "Ha habido un problema al eliminar el comentario." });
     }
-  }
-};
+  },
+ async toggleLike(req, res) {
+    try {
+      const { id } = req.params;
+      const userId = req.user._id;
 
+      const comment = await Comment.findById(id);
+
+      if (!comment) {
+        return res.status(404).send({ message: "Post no encontrado." });
+      }
+
+      const hasLiked = comment.likes.includes(userId);
+
+      if (hasLiked) {
+        comment.likes.pull(userId);  // Quitar el like
+      } else {
+        comment.likes.push(userId);  // Dar like
+      }
+
+      await comment.save();
+
+      res.status(200).send({
+        message: hasLiked ? "Like eliminado" : "Like añadido",
+        totalLikes: comment.likes.length
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ message: "Error al actualizar los likes." });
+    }
+  }
+}; 
 module.exports = CommentController;
