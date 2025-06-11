@@ -103,6 +103,7 @@ const CommentController = {
       res.status(500).send({ message: 'Ha habido un problema al eliminar el comentario.' });
     }
   },
+
   async toggleLike(req, res) {
     try {
       const { id } = req.params;
@@ -122,7 +123,7 @@ const CommentController = {
         comment.likes.push(userId); // Dar like
       }
 
-      await comment.save();
+      await comment.save({ validateModifiedOnly: true });
 
       res.status(200).send({
         message: hasLiked ? 'Like eliminado' : 'Like añadido',
@@ -134,4 +135,5 @@ const CommentController = {
     }
   },
 };
+
 module.exports = CommentController;

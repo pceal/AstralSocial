@@ -90,8 +90,13 @@ const UserController = {
       const token = req.headers.authorization?.replace('Bearer ', '');
       const payload = jwt.verify(token, JWT_SECRET);
 
-      const imagePath = req.file ? req.file.path : null;
-      const updateUser = await User.findByIdAndUpdate(payload._id, { ...req.body, image: imagePath }, { new: true });
+      const updateInfo = { ...req.body };
+
+      if (req.file) {
+        updateInfo.image = req.file.path;
+      }
+
+      const updateUser = await User.findByIdAndUpdate(payload._id, updateInfo, { new: true });
       res.status(200).send(updateUser);
     } catch (error) {
       console.error(error);

@@ -7,7 +7,7 @@ const upload = require('../middlewares/upload.js');
 router.post('/', upload.single('image'), UserController.register);
 router.post('/login', UserController.login);
 router.post('/follow/:_id', authentication, UserController.toggleFollow);
-router.put('/me', authentication, UserController.updateUser);
+router.put('/me', authentication, upload.single('image'), UserController.updateUser);
 router.put('/resetPassword/:recoverToken', UserController.resetPassword);
 router.get('/confirm/:emailToken', UserController.confirm);
 router.get('/me', authentication, UserController.getUserConnected);
