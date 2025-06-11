@@ -49,7 +49,7 @@ const CommentController = {
   },
 
   // Obtener comentarios por post
-  async getByPostId(req, res) {
+  async getCommentById(req, res) {
     try {
       const postId = req.params.postId;
 
