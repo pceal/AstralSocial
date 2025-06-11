@@ -16,7 +16,7 @@ const CommentController = {
       const imagePath = req.file ? req.file.path : null;
 
       const newComment = await Comment.create({
-        content: comment,
+        comment,
         author,
         post: postId,
         image: imagePath,
@@ -68,11 +68,7 @@ const CommentController = {
         return res.status(404).send({ message: 'Comentario no encontrado.' });
       }
 
-      if (comment.author.toString() !== req.user._id.toString()) {
-        return res.status(403).send({ message: 'No tienes permiso para editar este comentario.' });
-      }
-
-      comment.content = req.body.comment || comment.content;
+      comment.comment = req.body.comment || comment.comment;
       comment.image = req.file ? req.file.path : comment.image;
 
       await comment.save();
@@ -91,10 +87,6 @@ const CommentController = {
 
       if (!comment) {
         return res.status(404).send({ message: 'Comentario no encontrado.' });
-      }
-
-      if (comment.author.toString() !== req.user._id.toString()) {
-        return res.status(403).send({ message: 'No tienes permiso para eliminar este comentario.' });
       }
 
       await comment.deleteOne();
