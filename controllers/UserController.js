@@ -14,7 +14,8 @@ const UserController = {
       }
 
       const password = bcrypt.hashSync(req.body.password, 10);
-      const user = await User.create({ ...req.body, password, role: 'user' });
+      const imagePath = req.file ? req.file.path : null;
+      const user = await User.create({ ...req.body, image: imagePath, password, role: 'user' });
 
       const emailToken = jwt.sign({ email: req.body.email }, JWT_SECRET, { expiresIn: '48h' });
       const url = 'http://localhost:8080/users/confirm/' + emailToken;
@@ -81,6 +82,20 @@ const UserController = {
       res.send('Desconectad@ con exito');
     } catch (error) {
       res.status(500).send('Ha habido un problema al desconectar al usuari@');
+    }
+  },
+
+  async updateUser(req, res, next) {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      const payload = jwt.verify(token, JWT_SECRET);
+
+      const imagePath = req.file ? req.file.path : null;
+      const updateUser = await User.findByIdAndUpdate(payload._id, { ...req.body, image: imagePath }, { new: true });
+      res.status(200).send(updateUser);
+    } catch (error) {
+      console.error(error);
+      next(error);
     }
   },
 
@@ -164,7 +179,6 @@ const UserController = {
       });
       res.send('Un correo de recuperación se envió a tu dirección de correo');
     } catch (error) {
-      console.error(error);
       next(error);
     }
   },
