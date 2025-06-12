@@ -1,11 +1,12 @@
 module.exports = {
   components: {
     securitySchemes: {
-      bearerAuth: {
-        type: "http",
-        scheme: "bearer",
-        bearerFormat: "JWT"
-      }
-    }
-  }
+      jwtAuth: {
+        type: 'apiKey',
+        in: 'header',
+        name: 'authorization',
+        description: 'Token JWT (sin Bearer)',
+      },
+    },
+  },
 };
