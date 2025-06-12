@@ -1,8 +1,9 @@
+require('dotenv').config();
 const express = require('express');
 const { dbConnection } = require('./config/config');
 const { handleTypeError } = require('./middlewares/errors');
 const app = express();
-const PORT = 8080;
+const PORT = process.env.PORT;
 const swaggerUI = require('swagger-ui-express');
 const docs = require('./docs/index');
 
