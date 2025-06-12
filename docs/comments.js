@@ -1,18 +1,9 @@
 module.exports = {
-  "/comments": {
-    get: {
-      summary: "Obtener todos los comentarios",
-      tags: ["Comentarios"],
-      responses: {
-        200: { description: "Lista de comentarios obtenida correctamente" },
-        500: { description: "Error interno del servidor" }
-      }
-    }
-  },
   "/comments/post/{postId}": {
     post: {
-      summary: "Crear comentario en un post",
+      summary: "Crear un comentario en un post",
       tags: ["Comentarios"],
+      security: [{ jwtAuth: [] }],
       parameters: [
         {
           name: "postId",
@@ -29,7 +20,7 @@ module.exports = {
             schema: {
               type: "object",
               properties: {
-                comment: { type: "string" },
+                comment: { type: "string", example: "Este lugar es impresionante." },
                 image: { type: "string", format: "binary" }
               },
               required: ["comment"]
@@ -38,13 +29,34 @@ module.exports = {
         }
       },
       responses: {
-        201: { description: "Comentario creado correctamente" },
-        400: { description: "Falta el contenido del comentario" },
-        500: { description: "Error interno del servidor" }
+        201: {
+          description: "Comentario creado con éxito",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  _id: { type: "string" },
+                  comment: { type: "string" },
+                  author: { type: "string" },
+                  post: { type: "string" },
+                  image: { type: "string" },
+                  likes: {
+                    type: "array",
+                    items: { type: "string" }
+                  },
+                  createdAt: { type: "string", format: "date-time" }
+                }
+              }
+            }
+          }
+        },
+        400: { description: "Comentario requerido" },
+        500: { description: "Error al crear el comentario" }
       }
     },
     get: {
-      summary: "Obtener comentarios de un post por ID",
+      summary: "Obtener comentarios por ID del post",
       tags: ["Comentarios"],
       parameters: [
         {
@@ -52,36 +64,97 @@ module.exports = {
           in: "path",
           required: true,
           schema: { type: "string" },
-          description: "ID del post del que se desean obtener los comentarios"
+          description: "ID del post"
         }
       ],
       responses: {
-        200: { description: "Comentarios obtenidos correctamente" },
+        200: {
+          description: "Comentarios encontrados",
+          content: {
+            "application/json": {
+              schema: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    _id: { type: "string" },
+                    comment: { type: "string" },
+                    author: { type: "string" },
+                    post: { type: "string" },
+                    image: { type: "string" },
+                    likes: {
+                      type: "array",
+                      items: { type: "string" }
+                    },
+                    createdAt: { type: "string", format: "date-time" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        500: { description: "Error al obtener los comentarios del post" }
+      }
+    }
+  },
+
+  "/comments": {
+    get: {
+      summary: "Obtener todos los comentarios",
+      tags: ["Comentarios"],
+      responses: {
+        200: {
+          description: "Listado de comentarios",
+          content: {
+            "application/json": {
+              schema: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    _id: { type: "string" },
+                    comment: { type: "string" },
+                    author: { type: "string" },
+                    post: { type: "string" },
+                    image: { type: "string" },
+                    likes: {
+                      type: "array",
+                      items: { type: "string" }
+                    },
+                    createdAt: { type: "string", format: "date-time" }
+                  }
+                }
+              }
+            }
+          }
+        },
         500: { description: "Error interno del servidor" }
       }
     }
   },
-  "/comments/id/{_id}": {
+
+  "/comments/id/{id}": {
     put: {
-      summary: "Actualizar un comentario por ID",
+      summary: "Actualizar un comentario",
       tags: ["Comentarios"],
+      security: [{ jwtAuth: [] }],
       parameters: [
         {
-          name: "_id",
+          name: "id",
           in: "path",
           required: true,
           schema: { type: "string" },
-          description: "ID del comentario a actualizar"
+          description: "ID del comentario"
         }
       ],
       requestBody: {
-        required: false,
+        required: true,
         content: {
           "multipart/form-data": {
             schema: {
               type: "object",
               properties: {
-                comment: { type: "string" },
+                comment: { type: "string", example: "Actualización del comentario" },
                 image: { type: "string", format: "binary" }
               }
             }
@@ -89,34 +162,36 @@ module.exports = {
         }
       },
       responses: {
-        200: { description: "Comentario actualizado correctamente" },
+        200: {
+          description: "Comentario actualizado",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  _id: { type: "string" },
+                  comment: { type: "string" },
+                  author: { type: "string" },
+                  post: { type: "string" },
+                  image: { type: "string" },
+                  likes: {
+                    type: "array",
+                    items: { type: "string" }
+                  },
+                  createdAt: { type: "string", format: "date-time" }
+                }
+              }
+            }
+          }
+        },
         404: { description: "Comentario no encontrado" },
-        500: { description: "Error interno del servidor" }
+        500: { description: "Error al actualizar el comentario" }
       }
     },
     delete: {
-      summary: "Eliminar un comentario por ID",
+      summary: "Eliminar un comentario",
       tags: ["Comentarios"],
-      parameters: [
-        {
-          name: "_id",
-          in: "path",
-          required: true,
-          schema: { type: "string" },
-          description: "ID del comentario a eliminar"
-        }
-      ],
-      responses: {
-        200: { description: "Comentario eliminado correctamente" },
-        404: { description: "Comentario no encontrado" },
-        500: { description: "Error interno del servidor" }
-      }
-    }
-  },
-  "/comments/like/{id}": {
-    put: {
-      summary: "Dar o quitar like a un comentario",
-      tags: ["Comentarios"],
+      security: [{ jwtAuth: [] }],
       parameters: [
         {
           name: "id",
@@ -127,9 +202,44 @@ module.exports = {
         }
       ],
       responses: {
-        200: { description: "Like actualizado correctamente" },
+        200: { description: "Comentario eliminado correctamente" },
         404: { description: "Comentario no encontrado" },
-        500: { description: "Error al actualizar los likes" }
+        500: { description: "Error al eliminar el comentario" }
+      }
+    }
+  },
+
+  "/comments/like/{id}": {
+    put: {
+      summary: "Dar o quitar like a un comentario",
+      tags: ["Comentarios"],
+      security: [{ jwtAuth: [] }],
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string" },
+          description: "ID del comentario"
+        }
+      ],
+      responses: {
+        200: {
+          description: "Like actualizado",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  message: { type: "string" },
+                  totalLikes: { type: "integer" }
+                }
+              }
+            }
+          }
+        },
+        404: { description: "Comentario no encontrado" },
+        500: { description: "Error al dar o quitar like" }
       }
     }
   }

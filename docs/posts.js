@@ -1,32 +1,9 @@
 module.exports = {
   "/posts": {
-    get: {
-      summary: "Obtener todos los posts",
-      tags: ["Posts"],
-      parameters: [
-        {
-          name: "page",
-          in: "query",
-          schema: { type: "integer", default: 1 },
-          description: "Número de página para paginación"
-        }
-      ],
-      responses: {
-        200: {
-          description: "Lista de posts paginada",
-          content: {
-            "application/json": {
-              schema: {
-                $ref: "#/components/schemas/PostListResponse"
-              }
-            }
-          }
-        }
-      }
-    },
     post: {
       summary: "Crear un nuevo post",
       tags: ["Posts"],
+      security: [{ jwtAuth: [] }],
       requestBody: {
         required: true,
         content: {
@@ -34,14 +11,11 @@ module.exports = {
             schema: {
               type: "object",
               properties: {
-                title: { type: "string" },
-                content: { type: "string" },
+                title: { type: "string", example: "Un día en Endor" },
+                content: { type: "string", example: "Estuve explorando el bosque de Endor." },
                 images: {
                   type: "array",
-                  items: {
-                    type: "string",
-                    format: "binary"
-                  }
+                  items: { type: "string", format: "binary" }
                 }
               },
               required: ["title", "content"]
@@ -51,101 +25,96 @@ module.exports = {
       },
       responses: {
         201: {
-          description: "Post creado correctamente",
-          content: {
-            "application/json": {
-              schema: { $ref: "#/components/schemas/Post" }
-            }
-          }
-        }
-      }
-    }
-  },
-  "/posts/id/{_id}": {
-    get: {
-      summary: "Obtener un post por ID",
-      tags: ["Posts"],
-      parameters: [
-        {
-          name: "_id",
-          in: "path",
-          required: true,
-          schema: { type: "string" }
-        }
-      ],
-      responses: {
-        200: {
-          description: "Post obtenido",
+          description: "Post creado exitosamente",
           content: {
             "application/json": {
               schema: { $ref: "#/components/schemas/Post" }
             }
           }
         },
-        404: { description: "Post no encontrado" }
+        400: { description: "Datos inválidos" },
+        500: { description: "Error interno del servidor" }
       }
     },
-    put: {
-      summary: "Actualizar un post por ID",
+    get: {
+      summary: "Obtener todos los posts",
       tags: ["Posts"],
-      parameters: [
-        {
-          name: "_id",
-          in: "path",
-          required: true,
-          schema: { type: "string" }
-        }
-      ],
-      requestBody: {
-        content: {
-          "multipart/form-data": {
-            schema: {
-              type: "object",
-              properties: {
-                title: { type: "string" },
-                content: { type: "string" },
-                images: {
-                  type: "array",
-                  items: {
-                    type: "string",
-                    format: "binary"
-                  }
-                }
+      responses: {
+        200: {
+          description: "Listado de posts",
+          content: {
+            "application/json": {
+              schema: {
+                type: "array",
+                items: { $ref: "#/components/schemas/Post" }
               }
             }
           }
-        }
-      },
-      responses: {
-        200: { description: "Post actualizado" }
-      }
-    },
-    delete: {
-      summary: "Eliminar un post",
-      tags: ["Posts"],
-      parameters: [
-        {
-          name: "_id",
-          in: "path",
-          required: true,
-          schema: { type: "string" }
-        }
-      ],
-      responses: {
-        200: { description: "Post eliminado correctamente" }
+        },
+        500: { description: "Error interno del servidor" }
       }
     }
   },
-  "/posts/like/{id}": {
-    put: {
-      summary: "Añadir o quitar like a un post",
+
+  "/posts/id/{id}": {
+    get: {
+      summary: "Obtener un post por ID",
       tags: ["Posts"],
       parameters: [
         {
           name: "id",
           in: "path",
           required: true,
-          schema: { type: "string" }
+          schema: { type: "string" },
+          description: "ID del post"
+        }
+      ],
+      responses: {
+        200: {
+          description: "Post encontrado",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/Post" }
+            }
+          }
+        },
+        404: { description: "Post no encontrado" },
+        500: { description: "Error interno del servidor" }
+      }
+    },
+    delete: {
+      summary: "Eliminar un post",
+      tags: ["Posts"],
+      security: [{ jwtAuth: [] }],
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string" },
+          description: "ID del post a eliminar"
+        }
+      ],
+      responses: {
+        200: { description: "Post eliminado exitosamente" },
+        404: { description: "Post no encontrado" },
+        500: { description: "Error interno del servidor" }
+      }
+    }
+  },
+
+  "/posts/like/{id}": {
+    put: {
+      summary: "Dar o quitar like a un post",
+      tags: ["Posts"],
+      security: [{ jwtAuth: [] }],
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string" },
+          description: "ID del post al que se le da o quita like"
         }
       ],
       responses: {
@@ -162,34 +131,9 @@ module.exports = {
               }
             }
           }
-        }
-      }
-    }
-  },
-  "/posts/search": {
-    get: {
-      summary: "Buscar posts por título",
-      tags: ["Posts"],
-      parameters: [
-        {
-          name: "title",
-          in: "query",
-          required: true,
-          schema: { type: "string" }
-        }
-      ],
-      responses: {
-        200: {
-          description: "Posts encontrados",
-          content: {
-            "application/json": {
-              schema: {
-                type: "array",
-                items: { $ref: "#/components/schemas/Post" }
-              }
-            }
-          }
-        }
+        },
+        404: { description: "Post no encontrado" },
+        500: { description: "Error al dar o quitar like" }
       }
     }
   }
