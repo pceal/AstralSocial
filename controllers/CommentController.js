@@ -2,7 +2,6 @@ const Comment = require('../models/Comment');
 const Post = require('../models/Post');
 
 const CommentController = {
-  // Crear comentario
   async create(req, res) {
     try {
       const author = req.user._id;
@@ -33,7 +32,6 @@ const CommentController = {
     }
   },
 
-  // Obtener todos los comentarios
   async getAll(req, res) {
     try {
       const comments = await Comment.find()
@@ -48,14 +46,13 @@ const CommentController = {
     }
   },
 
-  // Obtener comentarios por post
   async getCommentById(req, res) {
     try {
       const postId = req.params.postId;
 
       const comments = await Comment.find({ post: postId })
         .populate('author', 'username')
-        .populate('likes', 'username') // nos va a encontrar los likes mediante el username
+        .populate('likes', 'username')
         .sort({ createdAt: -1 });
 
       res.status(200).send(comments);
@@ -65,7 +62,6 @@ const CommentController = {
     }
   },
 
-  // Actualizar comentario
   async update(req, res) {
     try {
       const comment = await Comment.findById(req.params._id);
@@ -86,7 +82,6 @@ const CommentController = {
     }
   },
 
-  // Eliminar comentario
   async delete(req, res) {
     try {
       const comment = await Comment.findById(req.params._id);
@@ -118,9 +113,9 @@ const CommentController = {
       const hasLiked = comment.likes.includes(userId);
 
       if (hasLiked) {
-        comment.likes.pull(userId); // Quitar el like
+        comment.likes.pull(userId);
       } else {
-        comment.likes.push(userId); // Dar like
+        comment.likes.push(userId);
       }
 
       await comment.save({ validateModifiedOnly: true });
