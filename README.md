@@ -68,7 +68,7 @@ Authorization: Bearer <token>
 
 - `POST /users/register`: Registro de nuevo usuario
 - `POST /users/login`: Login y obtención de token
-- `GET /users`: Listar todos los usuarios (solo admin)
+- `GET /users`: Listar todos los usuarios
 
 ### 📝 Posts
 
@@ -99,11 +99,16 @@ Las imágenes se guardan localmente en la carpeta `/uploads`, organizadas por:
 
 ---
 
+## 📝 Documentación de la API
+
+La documentación de la API del proyecto se encuentra detallada en el siguiente link:
+https://documenter.getpostman.com/view/45240473/2sB2x6krp3
+
+--
+
 ## ✨ Mejoras futuras
 
 - Añadir reacciones personalizadas
 - Notificaciones en tiempo real (socket.io)
-- Sistema de amigos o seguidores
-- Despliegue en Render o Railway
 
 ---
