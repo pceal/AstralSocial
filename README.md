@@ -69,6 +69,15 @@ Authorization: Bearer <token>
 - `POST /users/register`: Registro de nuevo usuario
 - `POST /users/login`: Login y obtención de token
 - `GET /users`: Listar todos los usuarios (solo admin)
+- `Post'/follow/:_id'`: Darle follor a un seguidor
+- `Put'/me'`: Actualizar imagen del usuario
+- `Put'/resetPassword/:recoverToken'`: Resetear contraseña
+- `Get'/confirm/:emailToken'`: Confirmar email
+- `Get'/me'`: Conectar el usuario
+- `Get'/username/:username'`: Traer el usuario por username
+- `Get('/id/:_id'`: para Traer al usuario por Id
+- `Get('/recoverPassword/:email'`: Recuperación de contraseña
+- `Delete('/logout'`: Para hacer un Logout
 
 ### 📝 Posts
 
