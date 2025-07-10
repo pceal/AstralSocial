@@ -1,10 +1,11 @@
 require('dotenv').config();
-const User = require('../models/User');
-const Post = require('../models/Post');
+const User = require('../models/User'); 
+const Post = require('../models/Post'); 
 const bcrypt = require('bcryptjs');
 const JWT_SECRET = process.env.JWT_SECRET;
 const jwt = require('jsonwebtoken');
-const transporter = require('../config/nodemailer');
+// const transporter = require('../config/nodemailer'); // <-- ELIMINADO/COMENTADO: Ya no se usa
+
 
 const UserController = {
   async register(req, res, next) {
@@ -17,31 +18,37 @@ const UserController = {
       const imagePath = req.file ? req.file.path : null;
       const user = await User.create({ ...req.body, image: imagePath, password, role: 'user' });
 
-      const emailToken = jwt.sign({ email: req.body.email }, JWT_SECRET, { expiresIn: '48h' });
-      const url = 'http://localhost:8080/users/confirm/' + emailToken;
-      await transporter.sendMail({
-        to: req.body.email,
-        subject: 'Confirme su registro',
-        html: `<h3>Bienvenid@, estás a un paso de registrarte</h3>
-        <a href="${url}">Click para confirmar tu registro</a>`,
-      });
+      // *** Lógica de envío de correo de confirmación ELIMINADA ***
+      // Ya no se genera emailToken ni se llama a transporter.sendMail
 
-      res.status(201).send({ msg: 'Te hemos enviado un correo para confirmar tu registro', user });
+      // Generar y guardar el token de autenticación para el registro
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET);
+      if (user.tokens.length > 4) user.tokens.shift(); // Limita el número de tokens
+      user.tokens.push(token);
+      await user.save(); // Guarda el usuario con el nuevo token
+
+      // La respuesta ahora solo indica el registro y el token
+      res.status(201).send({ msg: 'Usuario registrado con éxito', user, token }); 
     } catch (error) {
-      next(error);
+      console.error('Error durante el registro de usuario:', error); 
+      if (error.code === 11000) { 
+        return res.status(400).send('El email o nombre de usuario ya existe.');
+      }
+      res.status(500).send('Hubo un problema al registrar el usuario: ' + error.message);
     }
   },
 
-  async confirm(req, res) {
-    try {
-      const token = req.params.emailToken;
-      const payload = jwt.verify(token, JWT_SECRET);
-      await User.findOneAndUpdate({ email: payload.email }, { confirmed: true }, { new: true });
-      res.status(201).send('Usuari@ confirmado con éxito');
-    } catch (error) {
-      res.status(500).send('Ha habido un error al confirmar el usuari@');
-    }
-  },
+  // *** MÉTODO 'confirm' ELIMINADO: Ya no es necesario sin confirmación por email ***
+  // async confirm(req, res) {
+  //   try {
+  //     const token = req.params.emailToken;
+  //     const payload = jwt.verify(token, JWT_SECRET);
+  //     await User.findOneAndUpdate({ email: payload.email }, { confirmed: true }, { new: true });
+  //     res.status(201).send('Usuari@ confirmado con éxito');
+  //   } catch (error) {
+  //     res.status(500).send('Ha habido un error al confirmar el usuari@');
+  //   }
+  // },
 
   async login(req, res) {
     try {
@@ -50,9 +57,10 @@ const UserController = {
         return res.status(400).send('Usuari@ o contraseña incorrectos');
       }
 
-      if (!user.confirmed) {
-        return res.status(400).send('Debes confirmar tu correo');
-      }
+      // La verificación de 'user.confirmed' ya fue eliminada en una respuesta anterior
+      // if (!user.confirmed) {
+      //   return res.status(400).send('Debes confirmar tu correo');
+      // }
 
       const isMatch = await bcrypt.compare(req.body.password, user.password);
       if (!isMatch) {
@@ -62,7 +70,7 @@ const UserController = {
       if (user.tokens.length > 4) user.tokens.shift();
       user.tokens.push(token);
       await user.save();
-      res.status(200).send({ msg: `Bienvenid@ ${user.username}`, user });
+      res.status(200).send({ msg: `Bienvenid@ ${user.username}`, user, token }); 
     } catch (error) {
       console.error(error);
       res.status(500).send('Error en el login');
@@ -171,26 +179,27 @@ const UserController = {
     }
   },
 
-  async recoverPassword(req, res, next) {
-    try {
-      const recoverToken = jwt.sign({ email: req.params.email }, JWT_SECRET, { expiresIn: '48h' });
-      const url = 'http://localhost:8080/users/resetPassword/' + recoverToken;
-      await transporter.sendMail({
-        to: req.params.email,
-        subject: 'Recuperar contraseña',
-        html: `<h3>Recuperar contraseña</h3>
-        <a href="${url}">Click para recuperar contraseña</a>
-        El enlace expirará en 48 horas.`,
-      });
-      res.send('Un correo de recuperación se envió a tu dirección de correo');
-    } catch (error) {
-      next(error);
-    }
-  },
+  // *** MÉTODO 'recoverPassword' ELIMINADO: Ya no se usa sin envío de email ***
+  // async recoverPassword(req, res, next) {
+  //   try {
+  //     const recoverToken = jwt.sign({ email: req.params.email }, JWT_SECRET, { expiresIn: '48h' });
+  //     const url = 'http://localhost:8080/users/resetPassword/' + recoverToken;
+  //     await transporter.sendMail({
+  //       to: req.params.email,
+  //       subject: 'Recuperar contraseña',
+  //       html: `<h3>Recuperar contraseña</h3>
+  //       <a href="${url}">Click para recuperar contraseña</a>
+  //       El enlace expirará en 48 horas.`,
+  //     });
+  //     res.send('Un correo de recuperación se envió a tu dirección de correo');
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // },
 
   async resetPassword(req, res, next) {
     try {
-      const recoverToken = req.params.recoverToken;
+      const recoverToken = req.params.recoverToken; // Este token aún podría venir de una URL
       const payload = jwt.verify(recoverToken, JWT_SECRET);
       const password = bcrypt.hashSync(req.body.password, 10);
       await User.findOneAndUpdate({ email: payload.email }, { password });
@@ -199,6 +208,19 @@ const UserController = {
       next(error);
     }
   },
+  async getAllUsers(req, res) {
+    try {
+      const users = await User.find({}); // Encuentra todos los usuarios
+      res.status(200).send(users);
+    } catch (error) {
+      console.error('Error al obtener todos los usuarios:', error);
+      res.status(500).send('Ha habido un problema al obtener todos los usuarios');
+    }
+  }
 };
 
+
 module.exports = UserController;
+
+
+

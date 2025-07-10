@@ -19,4 +19,4 @@ const handleTypeError = (error, request, response, next) => {
 }
 
 
-module.exports = { handleTypeError };
+module.exports = { handleTypeError, handleValidationErrors };

@@ -6,11 +6,12 @@ const app = express();
 const PORT = process.env.PORT;
 const swaggerUI = require('swagger-ui-express');
 const docs = require('./docs/index');
-
+const cors = require('cors');
 dbConnection();
 
 // MIDDLEWARE
 app.use(express.json());
+app.use(cors());
 
 // ENDPOINTS
 app.use('/users', require('./routes/users'));
