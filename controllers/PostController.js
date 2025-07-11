@@ -1,34 +1,29 @@
 const Post = require('../models/Post');
 const User = require('../models/User');
-const path = require('path'); // *** AÑADE ESTA LÍNEA ***
+const path = require('path'); 
 
 const PostController = {
   async create(req, res) {
     try {
-      console.log("Backend: Entrando a PostController.create"); // Log de entrada
-      console.log("Backend: req.body recibido:", req.body); // Log del cuerpo de la solicitud
-      console.log("Backend: req.file recibido:", req.file); // Log del archivo (si hay)
-      console.log("Backend: req.user recibido:", req.user); // Log del usuario autenticado
+    
       const { title, content, images } = req.body;
       const author = req.user._id;
       let imagesToSave = []; 
       if (req.file) {
-        // *** ESTO ES LO CRÍTICO: Construir la URL relativa directamente ***
-        // req.file.filename ya es solo el nombre del archivo (ej. '1751789826954-865474841.png')
-        // La carpeta de destino ya la define Multer como 'uploads/posts'
+        
         const imageUrl = `/uploads/posts/${req.file.filename}`; 
         
-        imagesToSave.push(imageUrl); // Guarda la URL relativa web
-        console.log("Backend: URL de imagen relativa generada para guardar:", imageUrl);
+        imagesToSave.push(imageUrl); 
+        
       } else {
-        console.log("Backend: No se recibió ningún archivo de imagen en req.file.");
+       
       }
 
       const newPost = new Post({
         title,
         content,
         author,
-        images: imagesToSave, // Guarda el array de URLs relativas
+        images: imagesToSave, 
       });
 
       console.log("Backend: Intentando guardar nuevo post:", newPost);
@@ -124,7 +119,7 @@ const PostController = {
 
       const name = new RegExp(title, 'i');
 
-      const posts = await Post.find({ title: name }).select('author title content').populate('author', 'username');
+      const posts = await Post.find({ title: name }).select('author title content images createdAt').populate('author', 'username images');
 
       res.status(200).send(posts);
     } catch (error) {
@@ -175,7 +170,7 @@ const PostController = {
   async toggleLike(req, res) {
   try {
     const { id } = req.params;
-    const userId = req.user._id; // Asegúrate de que req.user._id es el ID del usuario autenticado
+    const userId = req.user._id; 
 
     const post = await Post.findById(id);
 
@@ -183,48 +178,42 @@ const PostController = {
       return res.status(404).send({ message: 'Post no encontrado.' });
     }
 
-    // Convertir userId a string para comparación si post.likes guarda ObjectIds
-    // Mongoose .includes() debería funcionar con ObjectIds, pero .toString() es más seguro
+    
     const hasLiked = post.likes.includes(userId); 
 
     if (hasLiked) {
-      // Usar .pull() de Mongoose para eliminar el ObjectId del array
+      
       post.likes.pull(userId); 
       console.log(`Backend: Usuario ${userId} ha quitado el like del post ${id}`);
     } else {
-      // Usar .push() para añadir el ObjectId al array
+     
       post.likes.push(userId); 
       console.log(`Backend: Usuario ${userId} ha dado like al post ${id}`);
     }
 
-    // Guarda los cambios en el post
+  
     const updatedPost = await post.save();
     const populatedPost = await Post.findById(updatedPost._id)
                                     .populate('author', 'username image'); 
 
-    // 2. Envía el post completo y actualizado (populatedPost)
-   // res.status(200).json(populatedPost); 
+    
     
 
-    // *** ¡CAMBIO CLAVE AQUÍ! Envía el objeto 'updatedPost' completo ***
-    res.status(200).json(populatedPost); // Envía el post actualizado completo
+   
+    res.status(200).json(populatedPost); 
     
   } catch (error) {
-    console.error("Error en toggleLike:", error); // Log más específico
+    console.error("Error en toggleLike:", error); 
     res.status(500).send({ message: 'Error al actualizar los likes.' });
   }
 },
 
-  // Añade este método al objeto PostController
+  
   async getPostsByAuthor(req, res) {
     try {
       const userId = req.params.userId;
 
-      // Opcional: Verificar si el userId existe en tu base de datos de usuarios
-      // const userExists = await User.findById(userId);
-      // if (!userExists) {
-      //   return res.status(404).send({ message: 'User not found' });
-      // }
+    
 
       const posts = await Post.find({ author: userId })
         .sort({ createdAt: -1 })
@@ -237,7 +226,7 @@ const PostController = {
     }
   },
 
-  // Añade este método al objeto PostController
+ 
   async updatePost(req, res) {
     try {
       const post = await Post.findById(req.params.id);
@@ -246,12 +235,12 @@ const PostController = {
         return res.status(404).send({ message: 'Post not found' });
       }
 
-      // Asegúrate de que el usuario que intenta actualizar es el propietario del post
-      if (post.author.toString() !== req.user.id) { // Usa 'user' aquí
+    
+      if (post.author.toString() !== req.user.id) { 
         return res.status(401).send({ message: 'User not authorized' });
       }
 
-      // Aquí puedes agregar la lógica de actualización si lo deseas
+     
 
       res.status(200).send({ message: 'Post autorizado para actualizar.' });
     } catch (error) {
