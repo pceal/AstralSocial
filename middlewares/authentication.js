@@ -1,9 +1,5 @@
 const User = require('../models/User');
-// *** LÍNEAS CORREGIDAS / ELIMINADAS SI NO SE USAN EN ESTE ARCHIVO ***
-// Si NO usas Post o Comment en el middleware 'authentication', elimínalas.
-// Si las usas en otros middlewares dentro de este archivo, asegúrate de que la sintaxis sea correcta.
-// const Post = require('../models/Post'); // Correcto si se usa
-// const Comment = require('../models/Comment'); // Correcto si se usa
+
 
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
@@ -90,8 +86,8 @@ const isAuthorPost = async (req, res, next) => {
 };
 
 const isAuthorComment = async (req, res, next) => {
-  // *** Si usas Comment aquí, asegúrate de que la importación de Comment esté activa y correcta arriba. ***
-  const Comment = require('../models/Comment'); // Mover la importación aquí si solo se usa en esta función
+ 
+  const Comment = require('../models/Comment'); 
   try {
     const comment = await Comment.findById(req.params._id);
     if (!comment) {

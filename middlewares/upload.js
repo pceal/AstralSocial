@@ -2,10 +2,9 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Define la carpeta base para las subidas
+
 const UPLOADS_BASE_DIR = path.join(__dirname, '../uploads');
 
-// Función para asegurar que un directorio existe
 const ensureDirectoryExists = (directory) => {
   if (!fs.existsSync(directory)) {
     console.log(`Multer Debug: Creando directorio: ${directory}`);
@@ -17,7 +16,7 @@ const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     console.log("Multer Debug: Entrando a destination function.");
     console.log("Multer Debug: req.baseUrl:", req.baseUrl);
-    console.log("Multer Debug: file.fieldname:", file.fieldname); // Debería ser 'images'
+    console.log("Multer Debug: file.fieldname:", file.fieldname); 
     console.log("Multer Debug: file.originalname:", file.originalname);
 
     let type = 'misc'; 
@@ -37,7 +36,7 @@ const storage = multer.diskStorage({
       cb(null, destinationPath);
     } catch (error) {
       console.error(`Multer Debug: ERROR al asegurar el directorio ${destinationPath}:`, error);
-      cb(error); // Pasa el error a Multer
+      cb(error); 
     }
   },
   filename: function (req, file, cb) {
@@ -63,9 +62,9 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({ 
   storage: storage,
-  fileFilter: fileFilter, // Asegúrate de que este filtro esté activo
+  fileFilter: fileFilter, 
   limits: {
-    fileSize: 1024 * 1024 * 5 // Límite de 5MB
+    fileSize: 1024 * 1024 * 5 
   }
 });
 

@@ -4,7 +4,7 @@ const Post = require('../models/Post');
 const bcrypt = require('bcryptjs');
 const JWT_SECRET = process.env.JWT_SECRET;
 const jwt = require('jsonwebtoken');
-// const transporter = require('../config/nodemailer'); // <-- ELIMINADO/COMENTADO: Ya no se usa
+
 
 
 const UserController = {
@@ -18,16 +18,15 @@ const UserController = {
       const imagePath = req.file ? req.file.path : null;
       const user = await User.create({ ...req.body, image: imagePath, password, role: 'user' });
 
-      // *** Lógica de envío de correo de confirmación ELIMINADA ***
-      // Ya no se genera emailToken ni se llama a transporter.sendMail
+     l
 
-      // Generar y guardar el token de autenticación para el registro
+      
       const token = jwt.sign({ _id: user._id }, JWT_SECRET);
-      if (user.tokens.length > 4) user.tokens.shift(); // Limita el número de tokens
+      if (user.tokens.length > 4) user.tokens.shift(); 
       user.tokens.push(token);
-      await user.save(); // Guarda el usuario con el nuevo token
+      await user.save(); 
 
-      // La respuesta ahora solo indica el registro y el token
+      
       res.status(201).send({ msg: 'Usuario registrado con éxito', user, token }); 
     } catch (error) {
       console.error('Error durante el registro de usuario:', error); 
@@ -38,17 +37,7 @@ const UserController = {
     }
   },
 
-  // *** MÉTODO 'confirm' ELIMINADO: Ya no es necesario sin confirmación por email ***
-  // async confirm(req, res) {
-  //   try {
-  //     const token = req.params.emailToken;
-  //     const payload = jwt.verify(token, JWT_SECRET);
-  //     await User.findOneAndUpdate({ email: payload.email }, { confirmed: true }, { new: true });
-  //     res.status(201).send('Usuari@ confirmado con éxito');
-  //   } catch (error) {
-  //     res.status(500).send('Ha habido un error al confirmar el usuari@');
-  //   }
-  // },
+  
 
   async login(req, res) {
     try {
@@ -57,10 +46,7 @@ const UserController = {
         return res.status(400).send('Usuari@ o contraseña incorrectos');
       }
 
-      // La verificación de 'user.confirmed' ya fue eliminada en una respuesta anterior
-      // if (!user.confirmed) {
-      //   return res.status(400).send('Debes confirmar tu correo');
-      // }
+      
 
       const isMatch = await bcrypt.compare(req.body.password, user.password);
       if (!isMatch) {
@@ -179,27 +165,10 @@ const UserController = {
     }
   },
 
-  // *** MÉTODO 'recoverPassword' ELIMINADO: Ya no se usa sin envío de email ***
-  // async recoverPassword(req, res, next) {
-  //   try {
-  //     const recoverToken = jwt.sign({ email: req.params.email }, JWT_SECRET, { expiresIn: '48h' });
-  //     const url = 'http://localhost:8080/users/resetPassword/' + recoverToken;
-  //     await transporter.sendMail({
-  //       to: req.params.email,
-  //       subject: 'Recuperar contraseña',
-  //       html: `<h3>Recuperar contraseña</h3>
-  //       <a href="${url}">Click para recuperar contraseña</a>
-  //       El enlace expirará en 48 horas.`,
-  //     });
-  //     res.send('Un correo de recuperación se envió a tu dirección de correo');
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // },
 
   async resetPassword(req, res, next) {
     try {
-      const recoverToken = req.params.recoverToken; // Este token aún podría venir de una URL
+      const recoverToken = req.params.recoverToken; 
       const payload = jwt.verify(recoverToken, JWT_SECRET);
       const password = bcrypt.hashSync(req.body.password, 10);
       await User.findOneAndUpdate({ email: payload.email }, { password });
@@ -210,7 +179,7 @@ const UserController = {
   },
   async getAllUsers(req, res) {
     try {
-      const users = await User.find({}); // Encuentra todos los usuarios
+      const users = await User.find({}); 
       res.status(200).send(users);
     } catch (error) {
       console.error('Error al obtener todos los usuarios:', error);
